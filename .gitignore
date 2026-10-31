@@ -1,0 +1,14 @@
+*.pdf
+*backup*.json
+.DS_Store
+.dev.vars
+.env
+.venv/
+.wrangler/
+__pycache__/
+dist/
+frontend/dist
+node_modules/
+samples/
+spendwise-backup*.json
+spendwise.db

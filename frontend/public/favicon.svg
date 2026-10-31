@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4cf"/><stop offset="1" stop-color="#ffd978"/></linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <g stroke="#4a2c17" stroke-width="2" stroke-linejoin="round">
+    <circle cx="17" cy="15" r="7" fill="#c98f5b"/><circle cx="47" cy="15" r="7" fill="#c98f5b"/>
+    <circle cx="17" cy="15" r="3.2" fill="#f6cfa6" stroke="none"/><circle cx="47" cy="15" r="3.2" fill="#f6cfa6" stroke="none"/>
+    <ellipse cx="32" cy="52" rx="17" ry="10" fill="#d9a066"/>
+    <circle cx="32" cy="29" r="19" fill="#d9a066"/>
+    <ellipse cx="32" cy="35" rx="8" ry="6" fill="#fbe6c8" stroke="none"/>
+  </g>
+  <ellipse cx="32" cy="32.5" rx="2.6" ry="1.9" fill="#4a2c17"/>
+  <path d="M29 36 q3 3 6 0" fill="none" stroke="#4a2c17" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="24.5" cy="27" r="2.3" fill="#4a2c17"/><circle cx="39.5" cy="27" r="2.3" fill="#4a2c17"/>
+  <circle cx="25.3" cy="26.2" r=".8" fill="#fff"/><circle cx="40.3" cy="26.2" r=".8" fill="#fff"/>
+  <circle cx="19.5" cy="33" r="3" fill="#f08a8a" opacity=".55"/><circle cx="44.5" cy="33" r="3" fill="#f08a8a" opacity=".55"/>
+  <circle cx="32" cy="50" r="9.5" fill="#ffc400" stroke="#4a2c17" stroke-width="2"/>
+  <circle cx="32" cy="50" r="6.6" fill="none" stroke="#c98a00" stroke-width="1"/>
+  <text x="32" y="54" font-family="Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#7a4a00">₹</text>
+  <circle cx="21.5" cy="50.5" r="4" fill="#d9a066" stroke="#4a2c17" stroke-width="2"/><circle cx="42.5" cy="50.5" r="4" fill="#d9a066" stroke="#4a2c17" stroke-width="2"/>
+</svg>
