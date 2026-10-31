@@ -1,0 +1,2 @@
+# SpendWise
+bank statement analyser 
