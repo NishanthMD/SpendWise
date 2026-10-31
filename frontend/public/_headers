@@ -1,12 +1,17 @@
 # Cloudflare Pages: security headers for the website.
-# Replace https://api.example.com with the address of your SpendWise server (the only place the site is allowed to talk to).
+# The site talks to nobody but itself: statements are read in the browser, so connect-src is 'self' only.
+# (If you use a SpendWise server instead, add its address to connect-src.)
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.example.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
+/pyodide/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/py/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 /assets/*

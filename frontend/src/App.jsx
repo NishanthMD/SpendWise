@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
+import * as engine from "./engine.js";
 import Budgets from "./Budgets.jsx";
 import Ledger from "./Ledger.jsx";
 import Logo from "./Logo.jsx";
@@ -290,7 +291,7 @@ export default function App() {
 
       <footer className="foot">
         <strong>{t("Stored in this browser only.")}</strong>{" "}
-        {t("Your transactions, notes, reminders, budgets and owed money are saved in this browser on this device, and nobody else can see them. When you upload a statement, the PDF is sent to the server just long enough to be read, then discarded: it is never saved or logged. There are no accounts and no bank connection.")}
+        {t("Your transactions, notes, reminders, budgets and owed money are saved in this browser on this device, and nobody else can see them. Reading a statement happens on your device: the PDF is never uploaded anywhere. There are no accounts and no bank connection.")}
         <DataBackup onDone={reload} />
       </footer>
     </div>
@@ -371,7 +372,7 @@ function UploadButton({ state, setState, onDone, pick }) {
   return (
     <div className="upload">
       <input ref={input} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => e.target.files[0] && send(e.target.files[0])} />
-      <button className="btn primary" disabled={state.phase === "busy"} onClick={() => input.current.click()}>
+      <button className="btn primary" disabled={state.phase === "busy"} onClick={() => input.current.click()} onPointerEnter={engine.prewarm} onFocus={engine.prewarm}>
         {state.phase === "busy" ? t("Reading…") : t("Upload statement")}
       </button>
       {pending && (
@@ -559,13 +560,15 @@ function ClearAll({ onCancel, onDone }) {
 
 function UploadStatus({ state, setState }) {
   const { t } = useLang();
+  const [eng, setEng] = useState(engine.getStatus());
+  useEffect(() => engine.onStatus(setEng), []);
   useEffect(() => {
     if (state.phase !== "done") return undefined;
     const t = setTimeout(() => setState({ phase: "idle" }), 14000);
     return () => clearTimeout(t);
   }, [state, setState]);
 
-  if (state.phase === "busy") return <div className="upload-banner"><TurtleLoader text={t("Reading your statement, one row at a time…")} /></div>;
+  if (state.phase === "busy") return <div className="upload-banner"><TurtleLoader text={eng.phase === "loading" ? `${t("Getting the reader ready (first visit only)")}: ${t(eng.detail)}…` : t("Reading your statement, one row at a time…")} /></div>;
   if (state.phase === "error")
     return (
       <div className="upload-banner err" role="alert">

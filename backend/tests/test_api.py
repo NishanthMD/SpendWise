@@ -154,7 +154,7 @@ note = {"title": "Plan", "body": "Cook more", "created_at": "2026-10-01T10:00:00
 pdf = me.post("/api/report", budgets=budgets, notes=[note])
 assert pdf.content[:4] == b"%PDF" and pdf.headers["content-type"] == "application/pdf"
 open(os.path.join(out_dir, "api_report.pdf"), "wb").write(pdf.content)
-me.post("/api/report", 422, budgets={"overall": "lots"})
+me.post("/api/report", 400, budgets={"overall": "lots"})
 print("fake passbook: every endpoint OK")
 
 # ---- the real statement: counts and totals only -----------------------------------------------------
@@ -246,3 +246,14 @@ assert c.post("/api/summary", content=b"x", headers={"content-length": str(40 * 
 assert c.get("/docs").status_code == 404, "no public API docs"
 assert set(os.listdir(os.path.dirname(HERE))) == files_before, "the server must not write any file"
 print("API CHECKS PASSED")
+
+# ---- the same code, called the way the browser calls it (core/api.call), gives the same answers --------------------------
+import json as _json
+from core import api as core_api
+
+assert _json.loads(core_api.call("categories", ""))["result"] == ok(c.get("/api/categories")).json()
+direct = _json.loads(core_api.call("summary", _json.dumps(me.body(budgets=budgets))))
+assert direct["ok"] and direct["result"] == me.post("/api/summary", budgets=budgets).json()
+assert _json.loads(core_api.call("passbook", _json.dumps({"rows": [{"kind": "oops"}]})))["status"] == 400
+assert _json.loads(core_api.call("nope", ""))["ok"] is False
+print("browser entry point matches the server OK")

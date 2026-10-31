@@ -1,5 +1,6 @@
 // Run: node tests/store.test.mjs   (the browser-side storage: no browser, no server needed)
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import * as s from "../src/store.js";
 
 const fresh = () => s._setState(s.emptyState());
@@ -156,4 +157,7 @@ fresh();
 assert.equal(s._getState().transactions.length, 0);
 s._setState(JSON.parse(alice));
 assert.equal(s._getState().transactions[0].uid, "alice");
+// the category names the website knows are the ones the Python reader produces
+const staticData = JSON.parse(readFileSync(new URL("../src/data/static.json", import.meta.url), "utf8"));
+assert.deepEqual([...s.ALL_CATEGORIES].sort(), [...staticData.categories].sort());
 console.log("STORE CHECKS PASSED");

@@ -57,3 +57,11 @@ print("bank choice OK")
 assert banks.detect_bank("Statement for HDFC0001234 savings") == "hdfc" and banks.detect_bank("welcome") is None
 assert banks.account_label("axis|current") == "Axis Bank, current account" and banks.account_label("") == "Bank not set"
 print(f"BANK LAYOUT CHECKS PASSED ({len(made)} statements)")
+
+# the website's copy of the bank list and categories must match core/
+import json
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+import export_static
+with open(export_static.PATH, encoding="utf-8") as _f:
+    assert json.load(_f) == json.loads(json.dumps(export_static.build())), "frontend/src/data/static.json is out of date: run tools/export_static.py"
+print("website bank list is in sync")

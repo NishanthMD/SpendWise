@@ -1,10 +1,13 @@
+import staticData from "./data/static.json";
+import * as engine from "./engine.js";
 import * as store from "./store.js";
 
-/* Your data never leaves your browser (see store.js). The only things sent to the server are a statement PDF to be read,
- * and the rows to add up for a chart or a report; the server answers and forgets. */
-const BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || "/api";
+/* Your data never leaves your browser (see store.js). The statement reader and the sums behind the charts run in the
+ * browser too (engine.js), so by default nothing is sent anywhere. Set VITE_API_BASE (for example
+ * "https://reader.example.com/api") to use a SpendWise server for that work instead; it answers and forgets. */
+const BASE = (import.meta.env && import.meta.env.VITE_API_BASE) || "";
 
-async function req(path, opts = {}) {
+async function serverReq(path, opts = {}) {
   let res;
   try {
     res = await fetch(BASE + path, opts);
@@ -24,7 +27,23 @@ async function req(path, opts = {}) {
   }
   return res;
 }
-const post = (path, body) => req(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+const PATHS = { summary: "/summary", passbook: "/passbook", average_daily: "/average-daily", report: "/report" };
+
+/** One operation, wherever it runs: in this browser (default) or on a server. */
+async function compute(op, payload) {
+  if (!BASE) return engine.run(op, payload);
+  const res = await serverReq(PATHS[op], { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  return op === "report" ? new Uint8Array(await res.arrayBuffer()) : res.json();
+}
+
+async function parseStatement(file, fields) {
+  if (!BASE) return engine.run("parse", fields, await file.arrayBuffer());
+  const fd = new FormData();
+  fd.append("file", file);
+  Object.entries(fields).forEach(([k, v]) => v && fd.append(k, v));
+  return (await serverReq("/parse", { method: "POST", body: fd })).json();
+}
+
 const local = (fn) => new Promise((resolve, reject) => {
   try {
     resolve(fn());
@@ -33,9 +52,7 @@ const local = (fn) => new Promise((resolve, reject) => {
   }
 });
 
-let bankCache;
-const banks = () => (bankCache ||= req("/banks").then((r) => r.json()).catch((e) => ((bankCache = null), Promise.reject(e))));
-let catCache;
+const banks = () => Promise.resolve(staticData.banks); // static: no need to wake Python for it
 
 const accountLabel = (account, info) => {
   if (!account) return "Bank not set";
@@ -46,38 +63,42 @@ const accountLabel = (account, info) => {
 };
 const accountId = (bank, type) => `${bank || "other"}|${type || "savings"}`;
 
-/** Rows plus the filters every server calculation takes. */
+/** Rows plus the filters every calculation takes. */
 const scopeBody = (p = {}) => ({ rows: store.rowsForServer(), start: p.start || null, end: p.end || null, account: p.account || null });
 
+const emptyPassbook = { empty: true, entries: [] };
+
 export const api = {
-  /* ---- the server reads and adds up; it stores nothing */
+  /* ---- reading a statement and adding things up (in this browser, or on a server if VITE_API_BASE is set) */
   upload: async (file, password, bank, accountType) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    if (password) fd.append("password", password);
-    if (bank) fd.append("bank", bank);
-    if (accountType) fd.append("account_type", accountType);
-    fd.append("overrides", JSON.stringify(store.getOverrides()));
-    fd.append("saved_merchants", JSON.stringify(store.knownMerchants()));
-    const res = await (await req("/parse", { method: "POST", body: fd })).json();
+    const res = await parseStatement(file, {
+      password: password || "", bank: bank || "", account_type: accountType || "",
+      overrides: JSON.stringify(store.getOverrides()), saved_merchants: JSON.stringify(store.knownMerchants()),
+    });
     const saved = store.addParsed(res);
     const { transactions, rename, overrides, ...info } = res;
     return { ...info, ...saved };
   },
   banks,
-  categories: () => (catCache ||= req("/categories").then((r) => r.json()).catch((e) => ((catCache = null), Promise.reject(e)))),
-  summary: async (start, end, account) => (await post("/summary", { ...scopeBody({ start, end, account }), budgets: store.getBudgets() })).json(),
-  passbook: async (p) =>
-    (await post("/passbook", {
-      ...scopeBody(p), category: p.category || null, q: p.q || null, sort: p.sort || "statement", kind: p.kind || null,
+  categories: () => Promise.resolve(staticData.categories),
+  summary: async (start, end, account) => {
+    const body = scopeBody({ start, end, account });
+    if (!body.rows.length) return { empty: true };
+    return compute("summary", { ...body, budgets: store.getBudgets() });
+  },
+  passbook: async (p) => {
+    const body = scopeBody(p);
+    if (!body.rows.length) return emptyPassbook;
+    return compute("passbook", {
+      ...body, category: p.category || null, q: p.q || null, sort: p.sort || "statement", kind: p.kind || null,
       min_amount: p.min_amount === "" || p.min_amount == null ? null : Number(p.min_amount),
       max_amount: p.max_amount === "" || p.max_amount == null ? null : Number(p.max_amount),
-    })).json(),
-  averageDaily: async (start, end, account) => (await post("/average-daily", scopeBody({ start, end, account }))).json(),
+    });
+  },
+  averageDaily: (start, end, account) => compute("average_daily", scopeBody({ start, end, account })),
   downloadReport: async (start, end, includeNotes, account) => {
-    const body = { ...scopeBody({ start, end, account }), budgets: store.getBudgets(), notes: includeNotes ? store.listNotes() : [] };
-    const blob = await (await post("/report", body)).blob();
-    const url = URL.createObjectURL(blob);
+    const bytes = await compute("report", { ...scopeBody({ start, end, account }), budgets: store.getBudgets(), notes: includeNotes ? store.listNotes() : [] });
+    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
     const a = document.createElement("a");
     a.href = url;
     a.download = "spending-report.pdf";

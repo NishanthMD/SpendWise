@@ -1,0 +1,442 @@
+{
+ "banks": {
+  "banks": [
+   {
+    "id": "sbi",
+    "name": "State Bank of India",
+    "ifsc": "SBIN",
+    "words": [
+     "state bank of india"
+    ],
+    "columns": "Txn Date | Value Date | Description | Ref No./Cheque No. | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "1 Oct 2025 or 01-10-2025",
+    "narration": "TO TRANSFER-UPI/DR/<ref>/<NAME>/<bank>/<vpa>/<note>; BY TRANSFER-NEFT*<IFSC>*<UTR>*<NAME>",
+    "order": "Oldest first",
+    "confidence": "public",
+    "notes": "The TO TRANSFER and BY TRANSFER prefixes are stripped before the payee is read."
+   },
+   {
+    "id": "hdfc",
+    "name": "HDFC Bank",
+    "ifsc": "HDFC",
+    "words": [
+     "hdfc bank"
+    ],
+    "columns": "Date | Narration | Chq./Ref.No. | Value Dt | Withdrawal Amt. | Deposit Amt. | Closing Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/25",
+    "narration": "UPI-<NAME>-<vpa>-<IFSC>-<ref>-<note>; NEFT CR-<IFSC>-<NAME>-<ref>; IMPS-<ref>-<NAME>-<bank>-<acct>",
+    "order": "Oldest first",
+    "confidence": "public",
+    "notes": "Narrations use hyphens, not slashes, and wrap onto a second line."
+   },
+   {
+    "id": "icici",
+    "name": "ICICI Bank",
+    "ifsc": "ICIC",
+    "words": [
+     "icici bank"
+    ],
+    "columns": "S No. | Value Date | Transaction Date | Cheque Number | Transaction Remarks | Withdrawal Amount (INR) | Deposit Amount (INR) | Balance (INR)",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<note>/<vpa>/<bank>; MMT/IMPS/<ref>/<note>/<NAME>/<bank>; INF/NEFT/<UTR>/<IFSC>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": "ICICI UPI lines carry the payee's handle, not a name, so the handle is used as the payee."
+   },
+   {
+    "id": "axis",
+    "name": "Axis Bank",
+    "ifsc": "UTIB",
+    "words": [
+     "axis bank"
+    ],
+    "columns": "Tran Date | Chq No | Particulars | Debit | Credit | Balance | Init. Br",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01-10-2025",
+    "narration": "NEFT/MB/<UTR>/<NAME>/<bank>; IMPS/P2A/<ref>/<NAME>/<code>/<bank>; MOB/TPFT/<NAME>/<ref>; RTGS/<UTR>/<NAME>/<bank>; UPI/P2A/<ref>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "layout",
+    "notes": "MB, P2A and TPFT are channel codes, never the payee."
+   },
+   {
+    "id": "kotak",
+    "name": "Kotak Mahindra Bank",
+    "ifsc": "KKBK",
+    "words": [
+     "kotak mahindra",
+     "kotak bank"
+    ],
+    "columns": "Date | Narration | Chq/Ref No | Withdrawal(Dr)/Deposit(Cr) | Balance",
+    "amounts": "One amount column with a Dr or Cr marker, and (Dr) or (Cr) after the balance",
+    "dates": "01-10-2025",
+    "narration": "UPI/<NAME>/<ref>/<note>; UPI/P2M/<ref>/<MERCHANT>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "pnb",
+    "name": "Punjab National Bank",
+    "ifsc": "PUNB",
+    "words": [
+     "punjab national bank"
+    ],
+    "columns": "Date | Instrument ID | Amount | Type (DR/CR) | Balance | Remarks",
+    "amounts": "One amount column plus a DR or CR type column",
+    "dates": "01-10-2025",
+    "narration": "UPI/<ref>/<DR or CR>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "bob",
+    "name": "Bank of Baroda",
+    "ifsc": "BARB",
+    "words": [
+     "bank of baroda"
+    ],
+    "columns": "Date | Narration | Chq.No. | Withdrawals | Deposits | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<DR or CR>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "canara",
+    "name": "Canara Bank",
+    "ifsc": "CNRB",
+    "words": [
+     "canara bank"
+    ],
+    "columns": "Date | Particulars | Deposits | Withdrawals | Balance (ePassbook, each entry ends with a Chq: line)",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01-10-2026",
+    "narration": "UPI/DR/<ref>/<NAME>/<bank>/<vpa>/<note>//<txn id>; UPI/REV/<ref> for refunds; card purchases MERCHANT*DESC CITY-dd/mm/yy",
+    "order": "Oldest first, not always in date order",
+    "confidence": "real",
+    "notes": "Read by word position because the narration wraps mid-word and the date and amounts sit mid-entry."
+   },
+   {
+    "id": "union",
+    "name": "Union Bank of India",
+    "ifsc": "UBIN",
+    "words": [
+     "union bank of india"
+    ],
+    "columns": "Date | Particulars | Chq No | Withdrawals | Deposits | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/DR/<ref>/<NAME>/<bank>/<vpa>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "boi",
+    "name": "Bank of India",
+    "ifsc": "BKID",
+    "words": [
+     "bank of india"
+    ],
+    "columns": "Date | Narration | Chq No | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<DR or CR>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "indian",
+    "name": "Indian Bank",
+    "ifsc": "IDIB",
+    "words": [
+     "indian bank"
+    ],
+    "columns": "Date | Particulars | Chq No | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "cbi",
+    "name": "Central Bank of India",
+    "ifsc": "CBIN",
+    "words": [
+     "central bank of india"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>/<bank>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "iob",
+    "name": "Indian Overseas Bank",
+    "ifsc": "IOBA",
+    "words": [
+     "indian overseas bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "uco",
+    "name": "UCO Bank",
+    "ifsc": "UCBA",
+    "words": [
+     "uco bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "indusind",
+    "name": "IndusInd Bank",
+    "ifsc": "INDB",
+    "words": [
+     "indusind bank"
+    ],
+    "columns": "Date | Particulars | Chq No | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>/<note>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "yes",
+    "name": "Yes Bank",
+    "ifsc": "YESB",
+    "words": [
+     "yes bank"
+    ],
+    "columns": "Transaction Date | Value Date | Narration | Withdrawals | Deposits | Running Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01-10-2025",
+    "narration": "UPI/<ref>/<NAME>/<note>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "idfc",
+    "name": "IDFC FIRST Bank",
+    "ifsc": "IDFB",
+    "words": [
+     "idfc first",
+     "idfc bank"
+    ],
+    "columns": "Transaction Date | Value Date | Particulars | Cheque No | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01-Oct-2025",
+    "narration": "UPI/DR/<ref>/<NAME>/<bank>/<vpa>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "federal",
+    "name": "Federal Bank",
+    "ifsc": "FDRL",
+    "words": [
+     "federal bank"
+    ],
+    "columns": "Date | Particulars | Chq No | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>/<note>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "sib",
+    "name": "South Indian Bank",
+    "ifsc": "SIBL",
+    "words": [
+     "south indian bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "karnataka",
+    "name": "Karnataka Bank",
+    "ifsc": "KARB",
+    "words": [
+     "karnataka bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "bandhan",
+    "name": "Bandhan Bank",
+    "ifsc": "BDBL",
+    "words": [
+     "bandhan bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "rbl",
+    "name": "RBL Bank",
+    "ifsc": "RATN",
+    "words": [
+     "rbl bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "au",
+    "name": "AU Small Finance Bank",
+    "ifsc": "AUBL",
+    "words": [
+     "au small finance"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "paytm",
+    "name": "Paytm Payments Bank",
+    "ifsc": "PYTM",
+    "words": [
+     "paytm payments bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "ippb",
+    "name": "India Post Payments Bank",
+    "ifsc": "IPOS",
+    "words": [
+     "india post payments bank"
+    ],
+    "columns": "Date | Narration | Debit | Credit | Balance",
+    "amounts": "Separate Withdrawal and Deposit columns",
+    "dates": "01/10/2025",
+    "narration": "UPI/<ref>/<NAME>",
+    "order": "Check from balances",
+    "confidence": "public",
+    "notes": ""
+   },
+   {
+    "id": "other",
+    "name": "Other bank",
+    "ifsc": "",
+    "words": [],
+    "columns": "Anything with Date, Narration or Particulars, amount columns and a Balance column",
+    "amounts": "Separate columns, or one amount with Dr or Cr",
+    "dates": "Any common Indian date style",
+    "narration": "Slash-, hyphen- or star-separated narrations",
+    "order": "Check from balances",
+    "confidence": "layout",
+    "notes": "The reader finds the columns itself."
+   }
+  ],
+  "account_types": [
+   {
+    "id": "savings",
+    "name": "Savings account",
+    "note": "Personal spending. Everything is read as personal spending and income."
+   },
+   {
+    "id": "salary",
+    "name": "Salary account",
+    "note": "Like savings. Regular credits are shown as income."
+   },
+   {
+    "id": "student",
+    "name": "Student or zero-balance account",
+    "note": "Like savings."
+   },
+   {
+    "id": "current",
+    "name": "Current account",
+    "note": "A business account. Company names (traders, industries, Pvt Ltd) are filed as shops, not people."
+   },
+   {
+    "id": "other",
+    "name": "Other",
+    "note": "Anything else."
+   }
+  ]
+ },
+ "categories": [
+  "Food",
+  "Groceries",
+  "Entertainment",
+  "Local Shops",
+  "Person",
+  "Transport",
+  "Shopping",
+  "Bills & Utilities",
+  "Health",
+  "Subscriptions",
+  "Education",
+  "Savings",
+  "Bank Charges",
+  "Cash",
+  "Other",
+  "Income",
+  "Reversed"
+ ]
+}

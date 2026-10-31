@@ -4,23 +4,13 @@ A website for seeing where your money went. You upload your bank statement PDF a
 
 There is no bank login, no scraping, no bank API and no credentials, ever. The PDF is the only data source.
 
-**Everyone's data stays in their own browser.** The server has no database and no accounts: it reads a PDF, does the sums for whatever rows a request carries, and forgets. Each person's transactions, budgets, notes, reminders and owed money are saved in that person's own browser (IndexedDB), so people using the same site can never see, leak or merge each other's data. See *Privacy* and *Deploying*.
+**Nothing is uploaded, and there is no server to run or pay for.** The statement reader is the same Python code as before (`pdfplumber`, `reportlab`), compiled to run inside your browser with Pyodide, so your PDF is read on your own device and never leaves it. Everyone's transactions, budgets, notes, reminders and owed money are saved in their own browser (IndexedDB), so people using the same site can never see, leak or merge each other's data. The site is just static files, so it hosts for free on Cloudflare Pages. See *Privacy* and *Deploying*.
+
+The first time someone uploads a statement, their browser downloads the reader (about 25 MB, then cached) and shows a progress message; reading a statement takes a second or two after that.
 
 ## Run it
 
-You need Python 3.9+ and Node 18+.
-
-**1. Backend** (the server that reads PDFs)
-
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-**2. Frontend** (second terminal)
+You need Node 18+ (Python 3.9+ only for the tests and the optional server).
 
 ```bash
 cd frontend
@@ -28,11 +18,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 and choose **Upload statement**. In development, `npm run dev` proxies `/api` to the backend on port 8000.
+Open http://localhost:5173 and choose **Upload statement**. `npm run dev` and `npm run build` first run `scripts/prepare-runtime.mjs`, which downloads the in-browser Python runtime (pinned and checksum-verified in `runtime.lock.json`) and copies `backend/core/*.py` next to it.
 
-To run it as one process instead, build the frontend once (`npm run build`) and open http://localhost:8000: the server also serves `frontend/dist` when it exists.
+**Optional server.** The same code also runs behind FastAPI (`backend/main.py`), for development or if you would rather host the reader yourself. Start it with `cd backend && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && uvicorn main:app --port 8000`, and build the website with `VITE_API_BASE=http://localhost:8000/api` to make it use that server instead of the browser. With the server running, `npm run build` output in `frontend/dist` is also served at http://localhost:8000.
 
-**Moving from the old single-user version:** your old `backend/spendwise.db` is not read by the new server. Turn it into a backup file with `python backend/tools/export_backup.py backend/spendwise.db my-backup.json`, then use **Restore backup** in the footer of the site. The file is plain JSON of your own data: keep it private (the repo already ignores `*backup*.json`).
+**Moving from the old single-user version:** your old `backend/spendwise.db` is not read by the new version. Turn it into a backup file with `python backend/tools/export_backup.py backend/spendwise.db my-backup.json`, then use **Restore backup** in the footer of the site. The file is plain JSON of your own data: keep it private (the repo already ignores `*backup*.json`).
 
 ## What is in it
 
@@ -112,23 +102,25 @@ What is known about each bank is in `backend/core/banks.py`, with a confidence l
 
 ## Privacy
 
-- **Your data lives only in your own browser** (IndexedDB on your device): transactions, notes, reminders, budgets, owed money and the category choices you made. The server cannot read it and there is nothing on the server to leak. Different people on the same site are separate by construction.
-- **What the server sees:** the statement PDF while it is being read (from a temporary file, deleted immediately), and, for charts, the passbook and the report, the rows your browser sends with that one request. None of it is saved or logged: there is no database, access logging is off in the Docker image, and API responses are marked `no-store`. The site says this in its footer.
+- **Your PDF never leaves your device.** It is read by Python running in a background thread of your own browser tab, from memory, and discarded. There is no upload, so there is nothing for anyone to log or leak.
+- **Your data lives only in your own browser** (IndexedDB): transactions, notes, reminders, budgets, owed money and the category choices you made. Different people on the same site are separate by construction.
+- **No third parties.** Fonts, the Python runtime and the PDF libraries are all served by the site itself, and there are no analytics or trackers. The site's Content-Security-Policy (`frontend/public/_headers`) only allows it to talk to itself.
 - **Trade-offs of keeping data in the browser:** it does not follow you to another device and it disappears if you clear the browser's site data. Use **Download backup** and **Restore backup** (site footer) to keep a copy or move to another device. The backup is plain JSON: store it privately.
 - **Clear all** (top of the control panel) removes every transaction, the record of each upload, your remembered categories and your budgets from this browser. Tick the box to delete notes, reminders and the owed-money list too.
-- No third-party requests: the fonts are served by the site itself, and there are no analytics or trackers.
+- If you choose to run the optional server instead, it is stateless (no database, no accounts, access logs off in the Docker image, responses `no-store`), but then statements do pass through it.
 
-## Deploying (Cloudflare Pages for the website, one small server for reading PDFs)
+## Deploying on Cloudflare Pages (free)
 
-The website is static, so it runs on **Cloudflare Pages**. The PDF reader (Python with `pdfplumber` and `reportlab`) cannot run on Pages or Workers, so it needs a small server somewhere that can run a container (Fly.io, Render, Google Cloud Run, a VPS). It is stateless: no disk, no database, scale it however you like.
+1. **Put the code in a private git repo.** `.gitignore` excludes `samples/`, `*.pdf`, databases, backups, `.env`, `.venv/`, `node_modules/`, `dist/` and the downloaded runtime. Check with `git status` before pushing.
+2. In Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, pick the repo, then set:
+   - Root directory: `frontend`
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+   - Environment variable `NODE_VERSION` = `20` (or newer)
+3. Deploy. The build downloads the pinned Python runtime from jsDelivr and PyPI, checks every file's SHA-256, and bundles it with the site. `_headers` in `frontend/public` is picked up automatically.
+4. Pages limits: every file must be under 25 MB (the largest is 9.6 MB) and a site under 20,000 files (this one has about 60).
 
-1. **Put the code in a private git repo.** `.gitignore` already excludes `samples/`, `*.pdf`, databases, backups, `.env`, `.venv/`, `node_modules/` and `dist/`. Check with `git status` before the first push.
-2. **Deploy the server** from `backend/` using the `Dockerfile` there. Set `SPENDWISE_ORIGINS` to the address of your website (for example `https://spendwise.pages.dev`), so only your site may call it. Note the server's address, for example `https://spendwise-api.fly.dev`.
-3. **Deploy the website** on Cloudflare Pages: connect the repo, set the root directory to `frontend`, the build command to `npm run build`, the output directory to `dist`, and the environment variable `VITE_API_BASE=https://spendwise-api.fly.dev/api`.
-4. **Edit `frontend/public/_headers`**: replace `https://api.example.com` with your server's address. That file gives the site a strict Content-Security-Policy that only allows talking to your own server.
-5. **Before you invite people:** put a short privacy note on the site (the footer already explains it), rate-limit the server (Cloudflare's free rate limiting in front of it is enough), and check what your hosting provider logs. If your host logs request bodies or keeps uploaded files, the promise in the footer would no longer be true.
-
-For just you, with no public server, you can instead run it on your own computer and reach it through a Cloudflare Tunnel with Cloudflare Access in front.
+To change the runtime (a newer Pyodide, other PDF library versions), edit the pins at the top of `frontend/scripts/prepare-runtime.mjs` and run `node scripts/prepare-runtime.mjs --update` to rewrite `runtime.lock.json`. If you change `backend/core/banks.py` or the categories, run `python backend/tools/export_static.py` (a test fails if the website's copy is stale).
 
 ## Where things are
 
@@ -138,7 +130,9 @@ For just you, with no public server, you can instead run it on your own computer
 | Categories, payee names, person vs shop, remarks | `backend/core/categorizer.py` |
 | Totals, series, balance by day, streaks, budget status | `backend/core/analytics.py` |
 | PDF report | `backend/core/report.py` |
-| The server (stateless: parse, summary, passbook, report) | `backend/main.py`, `backend/core/ingest.py` |
+| The reader and the sums (one set of Python functions, run in the browser or on a server) | `backend/core/api.py`, `backend/core/ingest.py` |
+| Running that Python in the browser | `frontend/src/py.worker.js`, `frontend/src/engine.js`, `frontend/scripts/prepare-runtime.mjs` |
+| Optional FastAPI wrapper | `backend/main.py` |
 | Storage in the browser, backup and restore | `frontend/src/store.js`, `frontend/src/api.js` |
 | Old SQLite database exporter | `backend/tools/export_backup.py`, `backend/tools/legacy_db.py` |
 | Owed money and splits | `frontend/src/store.js` (the rules), `frontend/src/Ledger.jsx` (the screen) |
