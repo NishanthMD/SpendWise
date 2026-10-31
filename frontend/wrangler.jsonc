@@ -1,0 +1,7 @@
+// Cloudflare deploy settings: serve the built website (the dist folder) as static files.
+// Build with `npm run build`, then `npx wrangler deploy` (Cloudflare runs both for you after each push).
+{
+  "name": "spendwise",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist" }
+}
